@@ -1,0 +1,10 @@
+{
+	"Dolibarr - PHP Toast message": {
+		"scope": "php, html, phtml",
+		"prefix": "dol:toast_php",
+		"body": [
+			"setEventMessage(${1:Message}, ${2:'mesgs' by default, 'warnings', 'errors'});",
+		],
+		"description": "Toast message for PHP script"
+	}
+}

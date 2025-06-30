@@ -1,0 +1,11 @@
+{
+	"preprint": {
+		"scope": "php",
+		"prefix": "preprint",
+		"body": [
+			"echo \"<pre>\";",
+			"print_r(\\$${1:var});",
+			"echo \"</pre>\";"
+		]
+	}
+}

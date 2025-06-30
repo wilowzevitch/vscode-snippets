@@ -1,0 +1,10 @@
+{
+	"Dolibarr - Toast message JS": {
+		"scope": "javascript,typescript",
+		"prefix": "dol:toast_js",
+		"body": [
+			"\\$.jnotify(${1:r.msg}, ${2:'error|warning'}, { delay: ${3:2500}, fadeSpeed: ${4:500} });",
+		],
+		"description": "Log output to console"
+	}
+}
