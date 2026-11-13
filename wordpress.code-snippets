@@ -1,0 +1,516 @@
+{
+	// ======== THEME ========
+	"Wordpress theme setup": {
+		"scope": "php",
+		"prefix": "wp:theme_setup",
+		"body": [
+			"function ${1:theme_name}_setup() {",
+			"\tload_theme_textdomain( '${1:theme_name}', get_template_directory() . '/languages' );",
+			"",
+			"\tadd_theme_support( 'title-tag' );",
+			"\tadd_theme_support( 'post-thumbnails' );",
+			"\tadd_theme_support( 'html5', [ 'search-form', 'comment-form', 'comment-list', 'gallery', 'caption', 'style', 'script' ] );",
+			"",
+			"\tregister_nav_menus( [",
+			"\t\t'${2:primary}' => '${3:Menu principal}',",
+			"\t] );",
+			"}",
+			"add_action( 'after_setup_theme', '${1:theme_name}_setup' );"
+		],
+		"description": "WordPress - after_setup_theme (supports, menus, textdomain)"
+	},
+
+	"Wordpress theme enqueue": {
+		"scope": "php",
+		"prefix": "wp:enqueue",
+		"body": [
+			"function ${1:theme_name}_enqueue_assets() {",
+			"\twp_enqueue_style(",
+			"\t\t'${1:theme_name}-style',",
+			"\t\tget_theme_file_uri( '${2:assets/css/main.css}' ),",
+			"\t\t[],",
+			"\t\tfilemtime( get_theme_file_path( '${2:assets/css/main.css}' ) )",
+			"\t);",
+			"",
+			"\twp_enqueue_script(",
+			"\t\t'${1:theme_name}-script',",
+			"\t\tget_theme_file_uri( '${3:assets/js/main.js}' ),",
+			"\t\t[],",
+			"\t\tfilemtime( get_theme_file_path( '${3:assets/js/main.js}' ) ),",
+			"\t\t[ 'in_footer' => true, 'strategy' => 'defer' ]",
+			"\t);",
+			"}",
+			"add_action( 'wp_enqueue_scripts', '${1:theme_name}_enqueue_assets' );"
+		],
+		"description": "WordPress - Enqueue style + script (cache-busting via filemtime; 'strategy' needs WP 6.3+)"
+	},
+
+	"Wordpress nav menu": {
+		"scope": "php",
+		"prefix": "wp:nav_menu",
+		"body": [
+			"wp_nav_menu( [",
+			"\t'theme_location'  => '${1:primary}',",
+			"\t'container'       => 'nav',",
+			"\t'container_class' => '${2:main-nav}',",
+			"\t'fallback_cb'     => false,",
+			"] );"
+		],
+		"description": "WordPress - Display a registered menu"
+	},
+
+	// ======== CUSTOMIZER ========
+	"Wordpress theme customizer": {
+		"scope": "php",
+		"prefix": "wp:theme_customizer",
+		"body": [
+			"<?php",
+			"/**",
+			" * Customizer — options du thème ${1:theme_name}",
+			" */",
+			"",
+			"defined( 'ABSPATH' ) || exit;",
+			"",
+			"",
+			"function ${1:theme_name}_customizer( WP_Customize_Manager \\$wp_customize ) {",
+			"",
+			"\t${2:// customization}",
+			"",
+			"}",
+			"add_action( 'customize_register', '${1:theme_name}_customizer' );"
+		],
+		"description": "Wordpress theme customizer"
+	},
+
+	"Wordpress theme panel": {
+		"scope": "php",
+		"prefix": "wp:theme_panel",
+		"body": [
+			"\\$wp_customize->add_panel( '${1:theme_name}_panel', [",
+			"\t'title'    => '🎨 ${1:theme_name} — ${2:Contenu}',",
+			"\t'priority' => 30,",
+			"] );"
+		],
+		"description": "Wordpress theme panel"
+	},
+
+	"Wordpress theme section": {
+		"scope": "php",
+		"prefix": "wp:theme_section",
+		"body": [
+			"\\$wp_customize->add_section( '${1:theme_name}_${2:section_name}', [",
+			"\t'title'    => '${3:section_title}',",
+			"\t'panel'    => '${1:theme_name}_panel',",
+			"\t'priority' => 10,",
+			"] );",
+			"",
+			"\\$${2:section_name}_fields = [",
+			"\t'${2:section_name}_${4:field}' => [ 'label' => '${5:Label}', 'default' => '${6:}', 'type' => '${7|text,textarea,url,checkbox|}' ],",
+			"];",
+			"",
+			"foreach ( \\$${2:section_name}_fields as \\$key => \\$args ) {",
+			"\t\\$wp_customize->add_setting( \"${1:theme_name}_\\$key\", [",
+			"\t\t'default'           => \\$args['default'],",
+			"\t\t'sanitize_callback' => 'wp_kses_post',",
+			"\t\t'transport'         => 'refresh',",
+			"\t] );",
+			"\t\\$wp_customize->add_control( \"${1:theme_name}_\\$key\", [",
+			"\t\t'label'   => \\$args['label'],",
+			"\t\t'section' => '${1:theme_name}_${2:section_name}',",
+			"\t\t'type'    => \\$args['type'],",
+			"\t] );",
+			"}"
+		],
+		"description": "Wordpress theme section (settings stored as theme_mods, output with get_theme_mod)"
+	},
+
+	"Wordpress customizer image control": {
+		"scope": "php",
+		"prefix": "wp:theme_control_image",
+		"body": [
+			"\\$wp_customize->add_setting( '${1:theme_name}_${2:key}', [",
+			"\t'default'           => 0,",
+			"\t'sanitize_callback' => 'absint',",
+			"] );",
+			"\\$wp_customize->add_control( new WP_Customize_Media_Control( \\$wp_customize, '${1:theme_name}_${2:key}', [",
+			"\t'label'     => '${3:Label}',",
+			"\t'section'   => '${1:theme_name}_${4:section_name}',",
+			"\t'mime_type' => 'image',",
+			"] ) );",
+			"",
+			"// Output: echo wp_get_attachment_image( (int) get_theme_mod( '${1:theme_name}_${2:key}' ), 'large' );"
+		],
+		"description": "WordPress Customizer - Media control (stores an attachment ID)"
+	},
+
+	"Wordpress customizer color control": {
+		"scope": "php",
+		"prefix": "wp:theme_control_color",
+		"body": [
+			"\\$wp_customize->add_setting( '${1:theme_name}_${2:key}', [",
+			"\t'default'           => '${3:#000000}',",
+			"\t'sanitize_callback' => 'sanitize_hex_color',",
+			"] );",
+			"\\$wp_customize->add_control( new WP_Customize_Color_Control( \\$wp_customize, '${1:theme_name}_${2:key}', [",
+			"\t'label'   => '${4:Label}',",
+			"\t'section' => '${1:theme_name}_${5:section_name}',",
+			"] ) );"
+		],
+		"description": "WordPress Customizer - Color picker control"
+	},
+
+	"Wordpress get theme mod": {
+		"scope": "php",
+		"prefix": "wp:mod",
+		"body": [
+			"<?php echo wp_kses_post( get_theme_mod( '${1:theme_name}_${2:key}', '${3:default}' ) ); ?>"
+		],
+		"description": "WordPress - Output a Customizer value (escaped)"
+	},
+
+	// ======== CONTENT ========
+	"WordPress Custom Post": {
+		"scope": "php",
+		"prefix": "wp:custompost",
+		"body": [
+			"/* ═══════════════════════════════════════════",
+			"   CPT : ${2:custompost_name}",
+			"   ═══════════════════════════════════════════ */",
+			"",
+			"function ${1:theme_name}_register_${2:custompost_name}() {",
+			"\tregister_post_type( '${2:custompost_name}', [",
+			"\t\t'labels'        => [",
+			"\t\t\t'name'          => '${3:custompost_title}',",
+			"\t\t\t'singular_name' => '${4:singular_label}',",
+			"\t\t\t'add_new_item'  => 'Ajouter un ${4:singular_label}',",
+			"\t\t\t'edit_item'     => 'Modifier le ${4:singular_label}',",
+			"\t\t\t'menu_name'     => '${3:custompost_title}',",
+			"\t\t\t// 'new_item'           => 'Nouveau ${4:singular_label}',",
+			"\t\t\t// 'view_item'          => 'Voir le ${4:singular_label}',",
+			"\t\t\t// 'search_items'       => 'Rechercher',",
+			"\t\t\t// 'not_found'          => 'Aucun ${4:singular_label} trouvé',",
+			"\t\t\t// 'not_found_in_trash' => 'Aucun ${4:singular_label} dans la corbeille',",
+			"\t\t],",
+			"\t\t'public'        => true,",
+			"\t\t'has_archive'   => true,",
+			"\t\t'show_in_rest'  => true,",
+			"\t\t'menu_icon'     => '${5:dashicons-hammer}',",
+			"\t\t'menu_position' => 5,",
+			"\t\t'supports'      => [ 'title', 'editor', 'thumbnail', 'excerpt', 'custom-fields' ],",
+			"\t\t'rewrite'       => [ 'slug' => '${6:custompost_name}s' ],",
+			"\t] );",
+			"}",
+			"add_action( 'init', '${1:theme_name}_register_${2:custompost_name}' );"
+		],
+		"description": "WordPress Custom Post Type"
+	},
+
+	"WordPress Taxonomy": {
+		"scope": "php",
+		"prefix": "wp:taxonomy",
+		"body": [
+			"function ${1:theme_name}_register_${2:taxonomy}() {",
+			"\tregister_taxonomy( '${2:taxonomy}', [ '${3:post_type}' ], [",
+			"\t\t'labels'            => [",
+			"\t\t\t'name'          => '${4:Plural}',",
+			"\t\t\t'singular_name' => '${5:Singular}',",
+			"\t\t],",
+			"\t\t'hierarchical'      => ${6|true,false|},",
+			"\t\t'public'            => true,",
+			"\t\t'show_admin_column' => true,",
+			"\t\t'show_in_rest'      => true,",
+			"\t\t'rewrite'           => [ 'slug' => '${2:taxonomy}' ],",
+			"\t] );",
+			"}",
+			"add_action( 'init', '${1:theme_name}_register_${2:taxonomy}' );"
+		],
+		"description": "WordPress - Custom taxonomy"
+	},
+
+	"WordPress Meta box": {
+		"scope": "php",
+		"prefix": "wp:metabox",
+		"body": [
+			"function ${1:theme_name}_add_${2:meta}_metabox() {",
+			"\tadd_meta_box( '${1:theme_name}_${2:meta}', '${3:Titre}', '${1:theme_name}_render_${2:meta}_metabox', '${4:post_type}', 'normal', 'default' );",
+			"}",
+			"add_action( 'add_meta_boxes', '${1:theme_name}_add_${2:meta}_metabox' );",
+			"",
+			"function ${1:theme_name}_render_${2:meta}_metabox( \\$post ) {",
+			"\twp_nonce_field( '${1:theme_name}_save_${2:meta}', '${1:theme_name}_${2:meta}_nonce' );",
+			"\t\\$value = get_post_meta( \\$post->ID, '_${2:meta}', true );",
+			"\t?>",
+			"\t<p>",
+			"\t\t<label for=\"${1:theme_name}_${2:meta}\"><?php echo esc_html( '${3:Titre}' ); ?></label>",
+			"\t\t<input type=\"text\" class=\"widefat\" id=\"${1:theme_name}_${2:meta}\" name=\"${1:theme_name}_${2:meta}\" value=\"<?php echo esc_attr( \\$value ); ?>\">",
+			"\t</p>",
+			"\t<?php",
+			"}",
+			"",
+			"function ${1:theme_name}_save_${2:meta}_metabox( \\$post_id ) {",
+			"\tif ( ! isset( \\$_POST['${1:theme_name}_${2:meta}_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( \\$_POST['${1:theme_name}_${2:meta}_nonce'] ) ), '${1:theme_name}_save_${2:meta}' ) ) {",
+			"\t\treturn;",
+			"\t}",
+			"\tif ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {",
+			"\t\treturn;",
+			"\t}",
+			"\tif ( ! current_user_can( 'edit_post', \\$post_id ) ) {",
+			"\t\treturn;",
+			"\t}",
+			"\tif ( isset( \\$_POST['${1:theme_name}_${2:meta}'] ) ) {",
+			"\t\tupdate_post_meta( \\$post_id, '_${2:meta}', sanitize_text_field( wp_unslash( \\$_POST['${1:theme_name}_${2:meta}'] ) ) );",
+			"\t}",
+			"}",
+			"add_action( 'save_post_${4:post_type}', '${1:theme_name}_save_${2:meta}_metabox' );"
+		],
+		"description": "WordPress - Meta box with nonce, capability check and sanitization"
+	},
+
+	"WordPress Shortcode": {
+		"scope": "php",
+		"prefix": "wp:shortcode",
+		"body": [
+			"function ${1:theme_name}_${2:shortcode}_shortcode( \\$atts, \\$content = null ) {",
+			"\t\\$atts = shortcode_atts( [",
+			"\t\t'${3:attr}' => '${4:default}',",
+			"\t], \\$atts, '${2:shortcode}' );",
+			"",
+			"\tob_start();",
+			"\t?>",
+			"\t<div class=\"${2:shortcode}\">",
+			"\t\t<?php echo esc_html( \\$atts['${3:attr}'] ); ?>",
+			"\t\t$0",
+			"\t</div>",
+			"\t<?php",
+			"\treturn ob_get_clean();",
+			"}",
+			"add_shortcode( '${2:shortcode}', '${1:theme_name}_${2:shortcode}_shortcode' );"
+		],
+		"description": "WordPress - Shortcode with attributes (output buffered, escaped)"
+	},
+
+	"WordPress WP_Query": {
+		"scope": "php",
+		"prefix": "wp:query",
+		"body": [
+			"\\$query = new WP_Query( [",
+			"\t'post_type'      => '${1:post}',",
+			"\t'post_status'    => 'publish',",
+			"\t'posts_per_page' => ${2:10},",
+			"\t'orderby'        => '${3|date,title,menu_order,rand|}',",
+			"\t'order'          => '${4|DESC,ASC|}',",
+			"] );",
+			"",
+			"if ( \\$query->have_posts() ) :",
+			"\twhile ( \\$query->have_posts() ) :",
+			"\t\t\\$query->the_post();",
+			"\t\t$0",
+			"\tendwhile;",
+			"\twp_reset_postdata();",
+			"else :",
+			"\t// Aucun résultat",
+			"endif;"
+		],
+		"description": "WordPress - WP_Query loop with wp_reset_postdata"
+	},
+
+	// ======== BACKEND ========
+	"WordPress Plugin skeleton": {
+		"scope": "php",
+		"prefix": "wp:plugin",
+		"body": [
+			"<?php",
+			"/**",
+			" * Plugin Name:       ${1:Plugin Name}",
+			" * Description:       ${2:Description}",
+			" * Version:           1.0.0",
+			" * Requires at least: 6.0",
+			" * Requires PHP:      7.4",
+			" * Author:            ${3:Author}",
+			" * License:           GPL-2.0-or-later",
+			" * Text Domain:       ${4:plugin-slug}",
+			" */",
+			"",
+			"defined( 'ABSPATH' ) || exit;",
+			"",
+			"define( '${5:PLUGIN}_VERSION', '1.0.0' );",
+			"define( '${5:PLUGIN}_PATH', plugin_dir_path( __FILE__ ) );",
+			"define( '${5:PLUGIN}_URL', plugin_dir_url( __FILE__ ) );",
+			"",
+			"register_activation_hook( __FILE__, function () {",
+			"\t// Register CPTs/taxonomies here first, then flush",
+			"\tflush_rewrite_rules();",
+			"} );",
+			"",
+			"register_deactivation_hook( __FILE__, 'flush_rewrite_rules' );"
+		],
+		"description": "WordPress - Plugin header, constants and activation hooks"
+	},
+
+	"WordPress AJAX handler": {
+		"scope": "php",
+		"prefix": "wp:ajax",
+		"body": [
+			"function ${1:theme_name}_${2:action}() {",
+			"\tcheck_ajax_referer( '${1:theme_name}_${2:action}', 'nonce' );",
+			"",
+			"\t// if ( ! current_user_can( 'edit_posts' ) ) {",
+			"\t//     wp_send_json_error( [ 'message' => 'Forbidden' ], 403 );",
+			"\t// }",
+			"",
+			"\t\\$value = isset( \\$_POST['value'] ) ? sanitize_text_field( wp_unslash( \\$_POST['value'] ) ) : '';",
+			"",
+			"\t$0",
+			"",
+			"\twp_send_json_success( [ 'value' => \\$value ] );",
+			"}",
+			"add_action( 'wp_ajax_${1:theme_name}_${2:action}', '${1:theme_name}_${2:action}' );",
+			"add_action( 'wp_ajax_nopriv_${1:theme_name}_${2:action}', '${1:theme_name}_${2:action}' ); // visiteurs non connectés",
+			"",
+			"// Enqueue side:",
+			"// wp_localize_script( '${1:theme_name}-script', '${1:theme_name}Ajax', [",
+			"//     'url'   => admin_url( 'admin-ajax.php' ),",
+			"//     'nonce' => wp_create_nonce( '${1:theme_name}_${2:action}' ),",
+			"// ] );"
+		],
+		"description": "WordPress - admin-ajax handler (nonce, sanitization, JSON response)"
+	},
+
+	"WordPress AJAX call JS": {
+		"scope": "php,javascript,javascriptreact,html",
+		"prefix": "wp:ajax_js",
+		"body": [
+			"const body = new FormData();",
+			"body.append( 'action', '${1:theme_name}_${2:action}' );",
+			"body.append( 'nonce', ${1:theme_name}Ajax.nonce );",
+			"body.append( 'value', ${3:value} );",
+			"",
+			"fetch( ${1:theme_name}Ajax.url, { method: 'POST', credentials: 'same-origin', body } )",
+			"\t.then( ( response ) => response.json() )",
+			"\t.then( ( json ) => {",
+			"\t\tif ( json.success ) {",
+			"\t\t\t$0",
+			"\t\t} else {",
+			"\t\t\tconsole.error( json.data );",
+			"\t\t}",
+			"\t} );"
+		],
+		"description": "WordPress - fetch call matching wp:ajax (uses the localized object)"
+	},
+
+	"WordPress REST route": {
+		"scope": "php",
+		"prefix": "wp:rest_route",
+		"body": [
+			"function ${1:theme_name}_register_rest_routes() {",
+			"\tregister_rest_route( '${2:namespace}/v1', '/${3:route}', [",
+			"\t\t'methods'             => '${4|GET,POST,PUT,DELETE|}',",
+			"\t\t'callback'            => '${1:theme_name}_${5:handler}',",
+			"\t\t'permission_callback' => '__return_true', // à restreindre (ex: current_user_can) si nécessaire",
+			"\t\t'args'                => [",
+			"\t\t\t'id' => [",
+			"\t\t\t\t'type'              => 'integer',",
+			"\t\t\t\t'required'          => false,",
+			"\t\t\t\t'sanitize_callback' => 'absint',",
+			"\t\t\t],",
+			"\t\t],",
+			"\t] );",
+			"}",
+			"add_action( 'rest_api_init', '${1:theme_name}_register_rest_routes' );",
+			"",
+			"function ${1:theme_name}_${5:handler}( WP_REST_Request \\$request ) {",
+			"\t\\$id = \\$request->get_param( 'id' );",
+			"",
+			"\t$0",
+			"",
+			"\treturn rest_ensure_response( [ 'id' => \\$id ] );",
+			"}"
+		],
+		"description": "WordPress - REST API route (permission_callback is mandatory)"
+	},
+
+	"WordPress Settings page": {
+		"scope": "php",
+		"prefix": "wp:settings_page",
+		"body": [
+			"function ${1:theme_name}_add_settings_page() {",
+			"\tadd_options_page( '${2:Titre de la page}', '${3:Menu}', 'manage_options', '${1:theme_name}-settings', '${1:theme_name}_render_settings_page' );",
+			"}",
+			"add_action( 'admin_menu', '${1:theme_name}_add_settings_page' );",
+			"",
+			"function ${1:theme_name}_register_settings() {",
+			"\tregister_setting( '${1:theme_name}_settings', '${1:theme_name}_${4:option}', [",
+			"\t\t'type'              => 'string',",
+			"\t\t'sanitize_callback' => 'sanitize_text_field',",
+			"\t\t'default'           => '',",
+			"\t] );",
+			"",
+			"\tadd_settings_section( '${1:theme_name}_main', 'Réglages', '__return_false', '${1:theme_name}-settings' );",
+			"\tadd_settings_field( '${1:theme_name}_${4:option}', '${5:Label}', '${1:theme_name}_render_${4:option}_field', '${1:theme_name}-settings', '${1:theme_name}_main' );",
+			"}",
+			"add_action( 'admin_init', '${1:theme_name}_register_settings' );",
+			"",
+			"function ${1:theme_name}_render_${4:option}_field() {",
+			"\tprintf(",
+			"\t\t'<input type=\"text\" class=\"regular-text\" name=\"${1:theme_name}_${4:option}\" value=\"%s\">',",
+			"\t\tesc_attr( get_option( '${1:theme_name}_${4:option}', '' ) )",
+			"\t);",
+			"}",
+			"",
+			"function ${1:theme_name}_render_settings_page() {",
+			"\tif ( ! current_user_can( 'manage_options' ) ) {",
+			"\t\treturn;",
+			"\t}",
+			"\t?>",
+			"\t<div class=\"wrap\">",
+			"\t\t<h1><?php echo esc_html( get_admin_page_title() ); ?></h1>",
+			"\t\t<form action=\"options.php\" method=\"post\">",
+			"\t\t\t<?php",
+			"\t\t\tsettings_fields( '${1:theme_name}_settings' );",
+			"\t\t\tdo_settings_sections( '${1:theme_name}-settings' );",
+			"\t\t\tsubmit_button();",
+			"\t\t\t?>",
+			"\t\t</form>",
+			"\t</div>",
+			"\t<?php",
+			"}"
+		],
+		"description": "WordPress - Settings API page under Settings"
+	},
+
+	"WordPress Cron": {
+		"scope": "php",
+		"prefix": "wp:cron",
+		"body": [
+			"function ${1:theme_name}_schedule_${2:task}() {",
+			"\tif ( ! wp_next_scheduled( '${1:theme_name}_${2:task}' ) ) {",
+			"\t\twp_schedule_event( time(), '${3|hourly,twicedaily,daily,weekly|}', '${1:theme_name}_${2:task}' );",
+			"\t}",
+			"}",
+			"add_action( 'init', '${1:theme_name}_schedule_${2:task}' );",
+			"",
+			"function ${1:theme_name}_run_${2:task}() {",
+			"\t$0",
+			"}",
+			"add_action( '${1:theme_name}_${2:task}', '${1:theme_name}_run_${2:task}' );",
+			"",
+			"// À la désactivation : wp_clear_scheduled_hook( '${1:theme_name}_${2:task}' );"
+		],
+		"description": "WordPress - Scheduled event (WP-Cron)"
+	},
+
+	"WordPress Transient": {
+		"scope": "php",
+		"prefix": "wp:transient",
+		"body": [
+			"\\$${1:data} = get_transient( '${2:cache_key}' );",
+			"",
+			"if ( false === \\$${1:data} ) {",
+			"\t\\$${1:data} = ${3:null};",
+			"\tset_transient( '${2:cache_key}', \\$${1:data}, ${4:HOUR_IN_SECONDS} );",
+			"}"
+		],
+		"description": "WordPress - Transient cache pattern"
+	}
+
+}

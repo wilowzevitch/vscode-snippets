@@ -1,0 +1,11 @@
+{
+	"Bash shebang": {
+		"scope": "shellscript,plaintext",
+		"prefix": "bash:shebang",
+		"body": [
+			"#!/usr/bin/env bash",
+			"",
+			""
+		]
+	}
+}

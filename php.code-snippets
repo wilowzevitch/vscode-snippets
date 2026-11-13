@@ -1,0 +1,30 @@
+{
+	"Display errors": {
+		"prefix": "display-errors",
+		"scope": "php",
+		"body": [
+			"ini_set('display_errors', 1);"
+			"ini_set('display_startup_errors', 1);"
+			"error_reporting(E_ERROR);"
+		],
+		"description": "Show PHP errors"
+	},
+	"Formatted print_r": {
+		"scope": "php",
+		"prefix": "preprint",
+		"body": [
+			"echo \"<pre>\";",
+			"print_r(\\$${1:var});",
+			"echo \"</pre>\";"
+		]
+	},
+		"Formatted dump": {
+		"scope": "php",
+		"prefix": "predump",
+		"body": [
+			"echo \"<pre>\";",
+			"var_dump(\\$${1:var});",
+			"echo \"</pre>\";"
+		]
+	}
+}

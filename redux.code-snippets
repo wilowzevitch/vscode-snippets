@@ -1,0 +1,136 @@
+{
+	// ======== REDUX CLASSIQUE ========
+	"Redux - Actions": {
+		"scope": "javascript,javascriptreact,typescript,typescriptreact",
+		"prefix": "redux:actions",
+		"body": [
+			"export const ${1:ACTION_TYPE} = '${1:ACTION_TYPE}';",
+			"",
+			"export const ${2:actionName} = (payload) => ({",
+			"\ttype: ${1:ACTION_TYPE},",
+			"\tpayload,",
+			"});"
+		],
+		"description": "Redux (classic) - Action type + action creator"
+	},
+
+	"Redux - Reducer": {
+		"scope": "javascript,javascriptreact,typescript,typescriptreact",
+		"prefix": "redux:reducer",
+		"body": [
+			"import { ${3:ACTION_TYPE} } from './${4:actions}';",
+			"",
+			"const initialState = {",
+			"\t${2:items}: [],",
+			"};",
+			"",
+			"export default function ${1:name}Reducer(state = initialState, action) {",
+			"\tswitch (action.type) {",
+			"\t\tcase ${3:ACTION_TYPE}:",
+			"\t\t\treturn {",
+			"\t\t\t\t...state,",
+			"\t\t\t\t${2:items}: action.payload,",
+			"\t\t\t};",
+			"\t\tdefault:",
+			"\t\t\treturn state;",
+			"\t}",
+			"}"
+		],
+		"description": "Redux (classic) - Reducer with initial state"
+	},
+
+	"Redux - Thunk": {
+		"scope": "javascript,javascriptreact,typescript,typescriptreact",
+		"prefix": "redux:thunk",
+		"body": [
+			"export const ${1:fetchItems} = (${2:params}) => async (dispatch, getState) => {",
+			"\tdispatch({ type: '${3:ITEMS}_REQUEST' });",
+			"",
+			"\ttry {",
+			"\t\tconst response = await fetch(${4:url});",
+			"\t\tif (!response.ok) {",
+			"\t\t\tthrow new Error(`HTTP \\${response.status}`);",
+			"\t\t}",
+			"\t\tconst data = await response.json();",
+			"\t\tdispatch({ type: '${3:ITEMS}_SUCCESS', payload: data });",
+			"\t} catch (error) {",
+			"\t\tdispatch({ type: '${3:ITEMS}_FAILURE', error: error.message });",
+			"\t}",
+			"};"
+		],
+		"description": "Redux (classic) - Async action creator (needs redux-thunk)"
+	},
+
+	"Redux - Selector": {
+		"scope": "javascript,javascriptreact,typescript,typescriptreact",
+		"prefix": "redux:selector",
+		"body": [
+			"import { createSelector } from 'reselect';",
+			"",
+			"const select${1:Slice} = (state) => state.${2:slice};",
+			"",
+			"export const ${3:selectItems} = createSelector(",
+			"\t[select${1:Slice}],",
+			"\t(${2:slice}) => ${2:slice}.${4:items}",
+			");"
+		],
+		"description": "Redux - Memoized selector (reselect)"
+	},
+
+	// ======== REDUX TOOLKIT ========
+	"Redux Toolkit - Slice": {
+		"scope": "javascript,javascriptreact,typescript,typescriptreact",
+		"prefix": "redux:slice",
+		"body": [
+			"import { createSlice } from '@reduxjs/toolkit';",
+			"",
+			"const initialState = {",
+			"\t${2:items}: [],",
+			"};",
+			"",
+			"const ${1:name}Slice = createSlice({",
+			"\tname: '${1:name}',",
+			"\tinitialState,",
+			"\treducers: {",
+			"\t\t${3:setItems}(state, action) {",
+			"\t\t\t// Immer: mutating \"state\" is fine here",
+			"\t\t\tstate.${2:items} = action.payload;",
+			"\t\t},",
+			"\t},",
+			"});",
+			"",
+			"export const { ${3:setItems} } = ${1:name}Slice.actions;",
+			"export default ${1:name}Slice.reducer;"
+		],
+		"description": "Redux Toolkit - createSlice"
+	},
+
+	"Redux Toolkit - Async thunk": {
+		"scope": "javascript,javascriptreact,typescript,typescriptreact",
+		"prefix": "redux:asyncThunk",
+		"body": [
+			"import { createAsyncThunk } from '@reduxjs/toolkit';",
+			"",
+			"export const ${1:fetchItems} = createAsyncThunk(",
+			"\t'${2:items}/${1:fetchItems}',",
+			"\tasync (${3:params}, { rejectWithValue }) => {",
+			"\t\tconst response = await fetch(${4:url});",
+			"\t\tif (!response.ok) {",
+			"\t\t\treturn rejectWithValue(`HTTP \\${response.status}`);",
+			"\t\t}",
+			"\t\treturn response.json();",
+			"\t}",
+			");",
+			"",
+			"// In the slice:",
+			"// extraReducers: (builder) => {",
+			"//     builder",
+			"//         .addCase(${1:fetchItems}.pending, (state) => { state.loading = true; })",
+			"//         .addCase(${1:fetchItems}.fulfilled, (state, action) => { state.loading = false; state.items = action.payload; })",
+			"//         .addCase(${1:fetchItems}.rejected, (state, action) => { state.loading = false; state.error = action.payload; });",
+			"// },"
+		],
+		"description": "Redux Toolkit - createAsyncThunk"
+	}
+
+}
